@@ -1,11 +1,11 @@
 # from django.http import JsonResponse,HttpResponse
 from django.shortcuts import render
-from .models import CarList,UsersModel
-from .api_file.serializers import CarSerializer, UserSerializer
+from .models import CarList,UsersModel,ShowroomModel
+from .api_file.serializers import CarSerializer, UserSerializer,ShowroomSerializer
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
-
+from rest_framework.views import APIView
 # import json
 # Create your views here.
 
@@ -83,7 +83,59 @@ def UserListView(request):
             return Response(serializer.data)
         else:
             return Response(serializer.errors,status=status.HTTP_404_NOT_FOUND)     
+   
+        
     
     
-    
+
+class ShowroomView(APIView):
+    def get(self,request):
+        try:
+            showrooms = ShowroomModel.objects.all()
+            serializer = ShowroomSerializer(showrooms,many=True)
+            return Response(serializer.data)
+        except Exception as error:
+            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+    def post(self,request):
+        try:
+            serializer = ShowroomSerializer(data=request.data)
+            if(serializer.is_valid()):
+                serializer.save()
+                return Response(serializer.data,status=status.HTTP_201_CREATED)
+            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+            
+        except Exception as errors:
+            return Response(errors,status=status.HTTP_400_BAD_REQUEST)
+            
+            
+class ShowroomDetails(APIView):
+    def get(self,request,pk):
+        try:
+            showroom = ShowroomModel.objects.get(pk=pk)
+            serializer = ShowroomSerializer(showroom)
+            return Response(serializer.data,status=status.HTTP_200_OK)
+        except Exception as errors:
+            return Response(errors,status=status.HTTP_400_BAD_REQUEST)
+    def put(self,request,pk):
+        try:
+            showroom = ShowroomModel.objects.get(pk=pk)
+            serializer = ShowroomSerializer(showroom,data=request.data)
+            if(serializer.is_valid()):
+                serializer.save()
+                return Response(serializer.data,status=status.HTTP_200_OK)
+            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+            
+        except Exception as errors:
+            return Response(errors,status=status.HTTP_400_BAD_REQUEST)
+    def delete(self,request,pk):
+        try:
+            showroom = ShowroomModel.objects.get(pk=pk)
+            showroom.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Exception as errors:
+            return Response(errors,status=status.HTTP_400_BAD_REQUEST)
+        
+        
+        
+        
 
