@@ -1,0 +1,15 @@
+<html>
+  <head>
+    <title>Django templates</title>
+  </head>
+  <body>
+    <h1>{{text|title}}</h1>
+    <ul>
+      {% for month in months %}
+      <li>
+        <a href="challenge2/{{ month }}"> {{ month }} </a>
+      </li>
+      {% endfor %}
+    </ul>
+  </body>
+</html>
