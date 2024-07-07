@@ -1,5 +1,7 @@
+from datetime import datetime,date
 from rest_framework import serializers
-from  ..models import CarList
+from  ..models import CarList,UsersModel
+from django.utils import timezone
 
 def alphanumeric(value):
     if not str(value).isalnum():
@@ -30,6 +32,16 @@ class CarSerializer(serializers.Serializer):
             raise serializers.ValidationError("name and description must be different")
         return data
 
+class UserSerializer(serializers.ModelSerializer):
+    age=serializers.SerializerMethodField()
+    class Meta:
+        model = UsersModel
+        fields="__all__"
+    def get_age(self,object):
+       today = timezone.now().date()
+       return int(today.year-(object.dob.year) - ((today.month,today.day)<(object.dob.month,object.dob.day))) 
         
-    
+        
+        
+        
     

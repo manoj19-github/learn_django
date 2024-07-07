@@ -1,7 +1,7 @@
 # from django.http import JsonResponse,HttpResponse
 from django.shortcuts import render
-from .models import CarList
-from .api_file.serializers import CarSerializer
+from .models import CarList,UsersModel
+from .api_file.serializers import CarSerializer, UserSerializer
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
@@ -67,7 +67,22 @@ def carDetailView(request,pk):
         return Response(status=status.HTTP_204_NO_CONTENT)
         
         
-        
+@api_view(["GET","POST"])
+def UserListView(request):
+    if request.method == "GET":
+        try:
+            users = UsersModel.objects.all()
+        except:
+            return Response({"error":"user not found"},status=status.HTTP_404_NOT_FOUND)
+        serializer = UserSerializer(users,many=True)
+        return Response(serializer.data)
+    if request.method == "POST":
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors,status=status.HTTP_404_NOT_FOUND)     
     
     
     
