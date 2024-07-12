@@ -1,12 +1,19 @@
 from datetime import datetime,date
 from rest_framework import serializers
-from  ..models import CarList,UsersModel,ShowroomModel
+from  ..models import CarList, ReviewModel,UsersModel,ShowroomModel
 from django.utils import timezone
 
 def alphanumeric(value):
     if not str(value).isalnum():
         raise serializers.ValidationError("Only alphanueric characters are allowed")
+
+class ReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=ReviewModel
+        fields="__all__"
+    
 class CarSerializer(serializers.ModelSerializer):
+    Reviews= ReviewSerializer(many=True,read_only=True)
     class Meta:
         model=CarList
         fields="__all__"
@@ -19,7 +26,14 @@ class CarSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("name and description must be different")
         return data
         
-            
+             
+class ShowroomSerializer(serializers.ModelSerializer):
+    cars=CarSerializer(many=True,read_only=True)
+    class Meta:
+        model = ShowroomModel
+        fields = "__all__"
+
+
 # class CarSerializer(serializers.Serializer):
 #     id = serializers.IntegerField(read_only=True)
 #     name = serializers.CharField()
@@ -47,12 +61,7 @@ class CarSerializer(serializers.ModelSerializer):
 #             raise serializers.ValidationError("name and description must be different")
 #         return data
 
-class ShowroomSerializer(serializers.ModelSerializer):
-    cars=CarSerializer(many=True,read_only=True)
-    class Meta:
-        model = ShowroomModel
-        fields = "__all__"
-        
+
 
 class UserSerializer(serializers.ModelSerializer):
     age=serializers.SerializerMethodField()

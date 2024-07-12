@@ -1,11 +1,15 @@
 # from django.http import JsonResponse,HttpResponse
 from django.shortcuts import render
-from .models import CarList,UsersModel,ShowroomModel
-from .api_file.serializers import CarSerializer, UserSerializer,ShowroomSerializer
+from .models import CarList,UsersModel,ShowroomModel,ReviewModel
+from .api_file.serializers import CarSerializer, UserSerializer,ShowroomSerializer,ReviewSerializer
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework.views import APIView
+from rest_framework.authentication import BasicAuthentication
+from rest_framework.permissions import IsAuthenticated
+from rest_framework import mixins, generics
+from rest_framework.viewsets import ViewSet
 # import json
 # Create your views here.
 
@@ -84,11 +88,47 @@ def UserListView(request):
         else:
             return Response(serializer.errors,status=status.HTTP_404_NOT_FOUND)     
    
+
+
+#   ViewSet 
+
+class ReviewSet(ViewSet):
+    def list(self,request):
+        querySet = ReviewModel.objects.all()
+        serializer=ReviewSerializer(querySet,many=True)
+        return Response(serializer.data)
+    def retrieve(self,request,pk):
+        try:
+            querySet=ReviewModel.objects.get(pk=pk)
+            serializer=ReviewSerializer(querySet)
+            return Response(serializer.data)
+        except Exception as errors:
+            return Response(errors,status=status.HTTP_400_BAD_REQUEST)
+    def create(self,request):
+        try:
+            serializer = ReviewSerializer(data=request.data)
+            if(serializer.is_valid()):
+                serializer.save()
+                return Response(serializer.data,status=status.HTTP_201_CREATED)
+            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+        except Exception as errors:
+            return Response(errors,status=status.HTTP_400_BAD_REQUEST)
+            
         
+            
+        
+        
+        
+        
+
+
+
     
     
 
 class ShowroomView(APIView):
+    authentication_classes = [BasicAuthentication]
+    permission_classes = [IsAuthenticated]
     def get(self,request):
         try:
             showrooms = ShowroomModel.objects.all()
@@ -137,5 +177,35 @@ class ShowroomDetails(APIView):
         
         
         
+# class ReviewGeneric(generics.ListAPIView,generics.CreateAPIView,generics.DestroyAPIView,generics.UpdateAPIView):
+#     queryset = ReviewModel.objects.all()
+#     serializer_class = ReviewSerializer
+#     lookup_field="id"
+    
         
+# class ReviewClass(mixins.ListModelMixin,mixins.CreateModelMixin,generics.GenericAPIView):
+#     queryset = ReviewModel.objects.all()
+#     serializer_class = ReviewSerializer     
+#     def get(self,request):
+#         return self.list(request)
+#     def post(self,request):
+#         return self.create(request)
 
+
+# class ReviewDetailClass(mixins.DestroyModelMixin,mixins.RetrieveModelMixin,mixins.UpdateModelMixin,generics.GenericAPIView):
+#     queryset = ReviewModel.objects.all()
+#     serializer_class = ReviewSerializer 
+#     def get(self,request,pk):
+#         return self.retrieve(request,pk)
+#     def put(self,request,pk):
+#         return self.update(request,pk)
+#     def delete(self,request,pk):
+#         return self.destroy(request,pk)
+
+class ReviewClass(generics.ListAPIView):
+    queryset = ReviewModel.objects.all()
+    serializer_class = ReviewSerializer 
+    
+class ReviewDetailClass(generics.RetrieveAPIView,generics.DestroyAPIView,generics.UpdateAPIView):
+    queryset = ReviewModel.objects.all()
+    serializer_class = ReviewSerializer 
